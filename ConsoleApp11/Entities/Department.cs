@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ConsoleApp11.Entities
 {
@@ -11,8 +6,12 @@ namespace ConsoleApp11.Entities
     {
         [Key]
         public int ID { get; set; }
-        public string Name { get; set; }
-        public int Ins_ID { get; set; }
+
+        [Required, MaxLength(100)]
+        public string Name { get; set; } = string.Empty;
+
         public DateTime HiringDate { get; set; }
+        public ICollection<Student> Students { get; set; } = new List<Student>();
+        public ICollection<Instructor>? Instructors { get; set; }
     }
 }

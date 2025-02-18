@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ConsoleApp11.Migrations
 {
     [DbContext(typeof(ITIdBContext))]
-    [Migration("20250216130736_InitialCreate")]
+    [Migration("20250218215436_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,25 +49,39 @@ namespace ConsoleApp11.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Top_ID");
+
                     b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("ConsoleApp11.Entities.Course_Instructor", b =>
                 {
-                    b.Property<int>("inst_ID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("Inst_ID")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("inst_ID"), 1L, 1);
-
                     b.Property<int>("Course_ID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CourseID")
                         .HasColumnType("int");
 
                     b.Property<string>("Evaluate")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("inst_ID");
+                    b.Property<int>("ID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("InstructorID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Inst_ID", "Course_ID");
+
+                    b.HasIndex("CourseID");
+
+                    b.HasIndex("Course_ID");
+
+                    b.HasIndex("InstructorID");
 
                     b.ToTable("Course_Instructors");
                 });
@@ -82,9 +96,6 @@ namespace ConsoleApp11.Migrations
 
                     b.Property<DateTime>("HiringDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("Ins_ID")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -111,6 +122,9 @@ namespace ConsoleApp11.Migrations
                     b.Property<decimal>("Bouns")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("DepartmentID")
+                        .HasColumnType("int");
+
                     b.Property<int>("Dept_ID")
                         .HasColumnType("int");
 
@@ -127,6 +141,10 @@ namespace ConsoleApp11.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("DepartmentID");
+
+                    b.HasIndex("Dept_ID");
+
                     b.ToTable("Instructors");
                 });
 
@@ -140,7 +158,8 @@ namespace ConsoleApp11.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Age")
                         .HasColumnType("int");
@@ -160,24 +179,38 @@ namespace ConsoleApp11.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Dep_Id");
+
                     b.ToTable("Students");
                 });
 
             modelBuilder.Entity("ConsoleApp11.Entities.Student_Course", b =>
                 {
-                    b.Property<int>("stud_ID")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("Stud_ID")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("stud_ID"), 1L, 1);
-
                     b.Property<int>("Course_ID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CourseID")
                         .HasColumnType("int");
 
                     b.Property<double>("Grade")
                         .HasColumnType("float");
 
-                    b.HasKey("stud_ID");
+                    b.Property<int>("ID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudentID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Stud_ID", "Course_ID");
+
+                    b.HasIndex("CourseID");
+
+                    b.HasIndex("Course_ID");
+
+                    b.HasIndex("StudentID");
 
                     b.ToTable("Stud_Courses");
                 });
@@ -192,11 +225,132 @@ namespace ConsoleApp11.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("ID");
 
                     b.ToTable("Topics");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Course", b =>
+                {
+                    b.HasOne("ConsoleApp11.Entities.Topic", "Topic")
+                        .WithMany("Courses")
+                        .HasForeignKey("Top_ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topic");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Course_Instructor", b =>
+                {
+                    b.HasOne("ConsoleApp11.Entities.Course", null)
+                        .WithMany("Instructors")
+                        .HasForeignKey("CourseID");
+
+                    b.HasOne("ConsoleApp11.Entities.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("Course_ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ConsoleApp11.Entities.Instructor", "Instructor")
+                        .WithMany()
+                        .HasForeignKey("Inst_ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ConsoleApp11.Entities.Instructor", null)
+                        .WithMany("Courses")
+                        .HasForeignKey("InstructorID");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Instructor");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Instructor", b =>
+                {
+                    b.HasOne("ConsoleApp11.Entities.Department", null)
+                        .WithMany("Instructors")
+                        .HasForeignKey("DepartmentID");
+
+                    b.HasOne("ConsoleApp11.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("Dept_ID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Student", b =>
+                {
+                    b.HasOne("ConsoleApp11.Entities.Department", "Department")
+                        .WithMany("Students")
+                        .HasForeignKey("Dep_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Student_Course", b =>
+                {
+                    b.HasOne("ConsoleApp11.Entities.Course", null)
+                        .WithMany("Students")
+                        .HasForeignKey("CourseID");
+
+                    b.HasOne("ConsoleApp11.Entities.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("Course_ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ConsoleApp11.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("Stud_ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ConsoleApp11.Entities.Student", null)
+                        .WithMany("Courses")
+                        .HasForeignKey("StudentID");
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Course", b =>
+                {
+                    b.Navigation("Instructors");
+
+                    b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Department", b =>
+                {
+                    b.Navigation("Instructors");
+
+                    b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Instructor", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Student", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("ConsoleApp11.Entities.Topic", b =>
+                {
+                    b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618
         }

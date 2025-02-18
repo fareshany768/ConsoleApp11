@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ConsoleApp11.Entities;
+﻿using ConsoleApp11.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace ConsoleApp11.Contextes
 {
-    internal class ITIdBContext:DbContext
+    internal class ITIdBContext : DbContext
     {
         public DbSet<Student> Students { get; set; }
         public DbSet<Course> Courses { get; set; }
@@ -20,37 +17,54 @@ namespace ConsoleApp11.Contextes
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server= . ;Database = ITIdB ;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer("Server= . ;Database = ITIdB ;Trusted_Connection=True;");
         }
-        /////////////////////////////////////////////
-        ///z
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Student>()
-                .Property(s => s.FName)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            modelBuilder.Entity<Student>()
-                .Property(s => s.LName)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            modelBuilder.Entity<Course>()
-                .Property(c => c.Name)
-                .IsRequired()
-                .HasMaxLength(100);
+                .HasOne(s => s.Department)
+                .WithMany(d => d.Students)
+                .HasForeignKey(s => s.Dep_Id)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Instructor>()
-                .Property(i => i.Name)
-                .IsRequired()
-                .HasMaxLength(100);
+                .HasOne(i => i.Department)
+                .WithMany()
+                .HasForeignKey(i => i.Dept_ID)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Department>()
-                .Property(d => d.Name)
-                .IsRequired()
-                .HasMaxLength(100);
+            modelBuilder.Entity<Course_Instructor>()
+                .HasKey(ci => new { ci.Inst_ID, ci.Course_ID });
+
+            modelBuilder.Entity<Course_Instructor>()
+                .HasOne(ci => ci.Instructor)
+                .WithMany()
+                .HasForeignKey(ci => ci.Inst_ID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Course_Instructor>()
+                .HasOne(ci => ci.Course)
+                .WithMany()
+                .HasForeignKey(ci => ci.Course_ID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            
+            modelBuilder.Entity<Student_Course>()
+                .HasKey(sc => new { sc.Stud_ID, sc.Course_ID });
+
+            modelBuilder.Entity<Student_Course>()
+                .HasOne(sc => sc.Student)
+                .WithMany()
+                .HasForeignKey(sc => sc.Stud_ID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Student_Course>()
+                .HasOne(sc => sc.Course)
+                .WithMany()
+                .HasForeignKey(sc => sc.Course_ID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
+        
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ConsoleApp11.Entities
 {
@@ -11,9 +7,19 @@ namespace ConsoleApp11.Entities
     {
         [Key]
         public int ID { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+
+        [Required, MaxLength(100)]
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
         public int Duration { get; set; }
+
+        [ForeignKey("Topic")]
         public int Top_ID { get; set; }
+
+        public Topic? Topic { get; set; }
+        public ICollection<Student_Course>? Students { get; set; }
+        public ICollection<Course_Instructor>? Instructors { get; set; }
     }
 }
